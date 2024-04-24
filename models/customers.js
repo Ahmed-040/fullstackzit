@@ -26,7 +26,10 @@ const createCustomer = async (customerData) => {
         customerData.country,
         customerData.phone_number
       ]);
-      return rows[0];
+    //   return rows[0]; Removing the hashed password and sending it back
+      const createdCustomer=rows[0];
+      delete createdCustomer.password;
+      return createdCustomer;
     } catch (error) {
       throw error;
     }
