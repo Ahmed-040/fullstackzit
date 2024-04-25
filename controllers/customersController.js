@@ -1,5 +1,9 @@
 const Customer = require('../models/customers');
 const Joi = require('joi');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const pool = require('../db');
+require('dotenv').config();
 //For validation purposes:
 const customerSchema = Joi.object({
     username: Joi.string().alphanum().min(3).max(30).required(),
@@ -147,7 +151,7 @@ const login = async (req, res) => {
   try {
       // Extract username and password from request body
       const { username, password } = req.body;
-
+      console.log(req.body);
       // Find the customer by username
       const { rows } = await pool.query('SELECT * FROM customers WHERE username = $1', [username]);
       const customer = rows[0];
@@ -165,7 +169,10 @@ const login = async (req, res) => {
 
       // Create JWT token
       const token = jwt.sign({ customerId: customer.customer_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
+      console.log(token);
+      // const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      // const customer_id = decodedToken.customerId;
+      // console.log('Customer ID:', customer_id);
       // Send token as response
       res.json({ token });
   } catch (error) {

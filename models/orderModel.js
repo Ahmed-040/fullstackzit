@@ -83,7 +83,7 @@ async createOrder(orderData) {
         // Create a transaction
         const { rows: [transaction] } = await client.query(
             'INSERT INTO transactions (order_id, amount, status) VALUES ($1, $2, $3) RETURNING *',
-            [orderId, amount, 'Failed']
+            [orderId, amount, 'Success']
         );
 
         const transactionId = transaction.transaction_id;
@@ -99,9 +99,22 @@ async createOrder(orderData) {
             updateOrderQuery,
             [transactionId, orderId]
         );
+         // Update the status of the order to 'Completed'
+         const updateStatusQuery = `
+         UPDATE orders
+         SET status = 'Completed'
+         WHERE order_id = $1
+         RETURNING *
+     `;
+     await client.query(
+         updateStatusQuery,
+         [orderId]
+     );
 
         // Commit the transaction
         await client.query('COMMIT');
+      // Update orderData status
+      orderData.status = 'Completed';
 
         return {
             order_id: orderId,
@@ -118,14 +131,22 @@ async createOrder(orderData) {
     }
 },
 
-   async getOrdersByCustomer(customerId) {
-        try {
-            const { rows } = await pool.query('SELECT * FROM orders WHERE customer_id = $1', [customerId]);
-            return rows;
-        } catch (error) {
-            throw error;
-        }
-    },
+async getOrdersByCustomer(customerId) {
+  try {
+      const query = `
+          SELECT o.order_id, o.customer_id, o.plan_id, o.status, o.transaction_id,
+                 p.plan_name, p.amount, p.expected_return
+          FROM orders o
+          INNER JOIN plans p ON o.plan_id = p.plan_id
+          WHERE o.customer_id = $1
+      `;
+      const { rows } = await pool.query(query, [customerId]);
+      return rows;
+  } catch (error) {
+      throw error;
+  }
+},
+
 
   async getAllOrders() {
     try {
