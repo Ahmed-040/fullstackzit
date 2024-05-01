@@ -16,10 +16,10 @@ const planController = {
     async getAllPlans(req, res) {
         try {
             const plans = await Plan.getAllPlans();
-            res.json(plans);
+            return res.json(plans);
         } catch (error) {
             console.error('Error fetching plans:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            return res.status(500).json({ error: 'Internal server error' });
         }
     },
 
@@ -31,10 +31,10 @@ const planController = {
             if (!plan) {
                 return res.status(404).json({ error: 'Plan not found' });
             }
-            res.json(plan);
+            return res.json(plan);
         } catch (error) {
             console.error('Error fetching plan:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            return res.status(500).json({ error: 'Internal server error' });
         }
     },
 
@@ -46,10 +46,10 @@ const planController = {
                 return res.status(400).json({ error: error.details[0].message, errorCode: 'VALIDATION_ERROR' });
             }
             const newPlan = await Plan.createPlan(req.body);
-            res.status(201).json(newPlan);
+            return res.status(201).json(newPlan);
         } catch (error) {
             console.error('Error creating plan:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            return res.status(500).json({ error: 'Internal server error' });
         }
     },
 
@@ -68,7 +68,7 @@ const planController = {
             res.json(updatedPlan);
         } catch (error) {
             console.error('Error updating plan:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            return res.status(500).json({ error: 'Internal server error' });
         }
     },
     // Delete plan by ID
@@ -79,10 +79,10 @@ const planController = {
             if (deletedCount === 0) {
                 return res.status(404).json({ error: 'Plan not found' });
             }
-            res.json({ message: `Plan with ID ${planId} deleted successfully` });
+            return res.json({ message: `Plan with ID ${planId} deleted successfully` });
         } catch (error) {
             console.error('Error deleting plan:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            return res.status(500).json({ error: 'Internal server error' });
         }
     }
 };
